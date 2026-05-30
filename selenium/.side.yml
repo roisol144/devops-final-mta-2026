@@ -1,0 +1,8 @@
+capabilities:
+  browserName: chrome
+  goog:chromeOptions:
+    args:
+      - --headless=new
+      - --no-sandbox
+      - --disable-gpu
+      - --window-size=1280,800

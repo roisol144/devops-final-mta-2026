@@ -1,0 +1,73 @@
+{
+  "id": "074ebce1-5681-4deb-8608-aaf843dbdd12",
+  "version": "2.0",
+  "name": "MetaAppTests",
+  "url": "http://localhost:8080",
+  "tests": [
+    {
+      "id": "d1d5941f-3166-4cd0-a0d7-b98eaf038865",
+      "name": "T1 - Page loads and title is correct (POSITIVE, assert)",
+      "commands": [
+        { "id": "10000000-0000-0000-0000-000000000001", "comment": "Prerequisite: open the deployed JSP", "command": "open", "target": "/roi-shiraz-omri-noa-arbel-app/", "targets": [], "value": "" },
+        { "id": "10000000-0000-0000-0000-000000000002", "comment": "Ensure a known viewport for repeatability", "command": "setWindowSize", "target": "1280x800", "targets": [], "value": "" },
+        { "id": "10000000-0000-0000-0000-000000000003", "comment": "ASSERT: if the heading isn't there, fail fast - nothing else matters", "command": "assertText", "target": "id=pageTitle", "targets": [], "value": "MeTA Corporate Greeting App" }
+      ]
+    },
+    {
+      "id": "c65ef621-0d0d-497d-bf11-e2bfd5491fc2",
+      "name": "T2 - Required form elements exist (POSITIVE, verify x3)",
+      "commands": [
+        { "id": "20000000-0000-0000-0000-000000000001", "comment": "", "command": "open", "target": "/roi-shiraz-omri-noa-arbel-app/", "targets": [], "value": "" },
+        { "id": "20000000-0000-0000-0000-000000000002", "comment": "VERIFY: continue on failure so we see all missing elements", "command": "verifyElementPresent", "target": "id=name", "targets": [], "value": "" },
+        { "id": "20000000-0000-0000-0000-000000000003", "comment": "", "command": "verifyElementPresent", "target": "id=greetBtn", "targets": [], "value": "" },
+        { "id": "20000000-0000-0000-0000-000000000004", "comment": "", "command": "verifyElementPresent", "target": "id=repoLink", "targets": [], "value": "" }
+      ]
+    },
+    {
+      "id": "b14f12a7-42b6-402e-a562-aea6f3b4e333",
+      "name": "T3 - Submitting a name shows the greeting (POSITIVE end-to-end, assert)",
+      "commands": [
+        { "id": "30000000-0000-0000-0000-000000000001", "comment": "", "command": "open", "target": "/roi-shiraz-omri-noa-arbel-app/", "targets": [], "value": "" },
+        { "id": "30000000-0000-0000-0000-000000000002", "comment": "Type a valid name into the required input", "command": "type", "target": "id=name", "targets": [], "value": "Roi" },
+        { "id": "30000000-0000-0000-0000-000000000003", "comment": "Click the required button to POST the form", "command": "click", "target": "id=greetBtn", "targets": [], "value": "" },
+        { "id": "30000000-0000-0000-0000-000000000004", "comment": "ASSERT: the JSP scriptlet must inject the greeting div", "command": "assertElementPresent", "target": "id=greeting", "targets": [], "value": "" },
+        { "id": "30000000-0000-0000-0000-000000000005", "comment": "ASSERT: greeted name must equal what we typed", "command": "assertText", "target": "id=greetingName", "targets": [], "value": "Roi" }
+      ]
+    },
+    {
+      "id": "8fada74a-6bdb-4a3d-b5ce-f5e5c83eeeb4",
+      "name": "T4 - Empty submission does NOT show greeting (NEGATIVE, verify)",
+      "commands": [
+        { "id": "40000000-0000-0000-0000-000000000001", "comment": "", "command": "open", "target": "/roi-shiraz-omri-noa-arbel-app/", "targets": [], "value": "" },
+        { "id": "40000000-0000-0000-0000-000000000002", "comment": "Click without typing anything", "command": "click", "target": "id=greetBtn", "targets": [], "value": "" },
+        { "id": "40000000-0000-0000-0000-000000000003", "comment": "VERIFY: JSP guard (name != null && !empty) must prevent greeting render", "command": "verifyElementNotPresent", "target": "id=greeting", "targets": [], "value": "" }
+      ]
+    },
+    {
+      "id": "8777aa1a-9288-4486-a3cd-dbf523bcac7a",
+      "name": "T5 - GitHub link is rendered with the right label (POSITIVE, verify)",
+      "commands": [
+        { "id": "50000000-0000-0000-0000-000000000001", "comment": "", "command": "open", "target": "/roi-shiraz-omri-noa-arbel-app/", "targets": [], "value": "" },
+        { "id": "50000000-0000-0000-0000-000000000002", "comment": "VERIFY: link text must say what we expect (sanity check on the link rendering)", "command": "verifyText", "target": "id=repoLink", "targets": [], "value": "View source on GitHub" }
+      ]
+    }
+  ],
+  "suites": [
+    {
+      "id": "a5cf0998-fb25-4908-9a53-5ad908301d32",
+      "name": "All 5 Validations",
+      "persistSession": false,
+      "parallel": false,
+      "timeout": 300,
+      "tests": [
+        "d1d5941f-3166-4cd0-a0d7-b98eaf038865",
+        "c65ef621-0d0d-497d-bf11-e2bfd5491fc2",
+        "b14f12a7-42b6-402e-a562-aea6f3b4e333",
+        "8fada74a-6bdb-4a3d-b5ce-f5e5c83eeeb4",
+        "8777aa1a-9288-4486-a3cd-dbf523bcac7a"
+      ]
+    }
+  ],
+  "urls": ["http://localhost:8080"],
+  "plugins": []
+}
