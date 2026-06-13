@@ -7,11 +7,13 @@ import static io.gatling.javaapi.http.HttpDsl.*;
 import java.time.Duration;
 
 /**
- * Load test: constant arrival rate BELOW measured max-limit, sustained 5 min.
+ * Load test: constant arrival rate BELOW the measured max-limit, sustained 5 min,
+ * against the public Oracle VM (1 OCPU) over the internet.
  *
- * 50 new VUs/sec × 200 keep-alive requests = ~10,000 RPS sustained
- * (max-limit measured at ≥20,800 RPS, so this is roughly 50% of capacity —
- * the production "normal traffic" envelope).
+ * 50 new VUs/sec × 40 keep-alive requests ≈ ~2,000-2,500 RPS sustained —
+ * roughly 50% of the measured cliff (~4,000-5,000 RPS), i.e. the production
+ * "normal traffic" envelope. Connections capped low so the load generator
+ * never becomes the bottleneck.
  *
  * Expectation: 0 errors, p99 well under 1s. If assertions fail, the
  * app has regressed under expected load.
@@ -22,10 +24,10 @@ public class LoadSimulation extends Simulation {
         .baseUrl(System.getProperty("baseUrl", "http://localhost:8080"))
         .acceptHeader("text/html,application/xhtml+xml")
         .userAgentHeader("Gatling-Load/1.0")
-        .maxConnectionsPerHost(2000);
+        .maxConnectionsPerHost(300);
 
     ScenarioBuilder scn = scenario("Steady load below max limit")
-        .repeat(200).on(
+        .repeat(40).on(
             exec(http("GET /roi-shiraz-omri-noa-arbel-app/").get("/roi-shiraz-omri-noa-arbel-app/").check(status().is(200)))
         );
 

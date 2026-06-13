@@ -1,6 +1,6 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
-  <description>HTTP probe of localhost:8080/roi-shiraz-omri-noa-arbel-app/ every 5 minutes. Build green = app UP.</description>
+  <description>HTTP probe of the public Oracle VM (151.145.91.183:8080/roi-shiraz-omri-noa-arbel-app/) every 5 minutes. Build green = app UP.</description>
   <keepDependencies>false</keepDependencies>
   <properties/>
   <scm class="hudson.scm.NullSCM"/>
@@ -17,7 +17,7 @@
   <builders>
     <hudson.tasks.Shell>
       <command>set -e
-  URL=&quot;http://localhost:8080/roi-shiraz-omri-noa-arbel-app/&quot;
+  URL=&quot;http://151.145.91.183:8080/roi-shiraz-omri-noa-arbel-app/&quot;
   CODE=$(curl -s -o /dev/null -w &quot;%{http_code}&quot; --max-time 10 &quot;$URL&quot;)
   TIME=$(curl -s -o /dev/null -w &quot;%{time_total}&quot; --max-time 10 &quot;$URL&quot;)
   echo &quot;Probed $URL&quot;
