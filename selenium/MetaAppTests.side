@@ -2,7 +2,7 @@
   "id": "074ebce1-5681-4deb-8608-aaf843dbdd12",
   "version": "2.0",
   "name": "MetaAppTests",
-  "url": "http://localhost:8080",
+  "url": "http://151.145.91.183:8080",
   "tests": [
     {
       "id": "d1d5941f-3166-4cd0-a0d7-b98eaf038865",
@@ -68,6 +68,6 @@
       ]
     }
   ],
-  "urls": ["http://localhost:8080"],
+  "urls": ["http://151.145.91.183:8080"],
   "plugins": []
 }

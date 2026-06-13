@@ -21,7 +21,7 @@ import java.time.Duration;
 public class StressSimulation extends Simulation {
 
     HttpProtocolBuilder httpProtocol = http
-        .baseUrl("http://localhost:8080")
+        .baseUrl(System.getProperty("baseUrl", "http://localhost:8080"))
         .acceptHeader("text/html,application/xhtml+xml")
         .userAgentHeader("Gatling-Stress/1.0")
         .maxConnectionsPerHost(4000);

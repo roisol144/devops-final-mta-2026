@@ -20,7 +20,7 @@
 
     <form method="post" action="index.jsp">
         <label for="name">Your name:</label>
-        <input type="text" id="name" name="name" placeholder="Type your name" value="Guest" />
+        <input type="text" id="name" name="name" placeholder="Type your name" />
         <button type="submit" id="greetBtn">Greet me</button>
     </form>
 
