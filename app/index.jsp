@@ -14,15 +14,15 @@
     </style>
 </head>
 <body>
-    <h1 id="pageTitle">MeTA Corporate Greeting App !</h1>
+    <h1 id="pageTitle">MeTA Corporate Greeting App</h1>
     <p>DevOps Final Project &mdash; MTA 2026 Semester B</p>
     <p id="version" style="color:#16a34a;font-weight:bold;">v4 &mdash; deploy + selenium chained pipeline</p>
 
-    <form method="post" action="index.jsp">
+    <!-- <form method="post" action="index.jsp">
         <label for="name">Your name:</label>
         <input type="text" id="name" name="name" placeholder="Type your name" />
         <button type="submit" id="greetBtn">Greet me</button>
-    </form>
+    </form> -->
 
     <%
         String name = request.getParameter("name");
