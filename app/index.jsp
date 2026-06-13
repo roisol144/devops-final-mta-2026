@@ -16,7 +16,7 @@
 <body>
     <h1 id="pageTitle">MeTA Corporate Greeting App</h1>
     <p>DevOps Final Project &mdash; MTA 2026 Semester B</p>
-    <p id="version" style="color:#16a34a;font-weight:bold;">v3 &mdash; deploy + selenium chained pipeline</p>
+    <p id="version" style="color:#16a34a;font-weight:bold;">v4 &mdash; deploy + selenium chained pipeline</p>
 
     <form method="post" action="index.jsp">
         <label for="name">Your name:</label>
