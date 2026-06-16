@@ -82,7 +82,7 @@ pipeline {
         }
 
         stage('Gatling Load (5 min)') {
-            when { expression { return params.RUN_LOAD } }
+            // when { expression { return params.RUN_LOAD } }
             steps {
                 sh '''
                     set -e
@@ -95,7 +95,7 @@ pipeline {
         }
 
         stage('Gatling Stress (5 min)') {
-            when { expression { return params.RUN_STRESS } }
+            // when { expression { return params.RUN_STRESS } }
             steps {
                 sh '''
                     set -e
@@ -108,7 +108,7 @@ pipeline {
         }
 
         stage('Gatling Max Limit') {
-            when { expression { return params.RUN_MAXLIMIT } }
+            // when { expression { return params.RUN_MAXLIMIT } }
             steps {
                 sh '''
                     set -e
