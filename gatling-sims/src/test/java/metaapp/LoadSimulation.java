@@ -7,16 +7,18 @@ import static io.gatling.javaapi.http.HttpDsl.*;
 import java.time.Duration;
 
 /**
- * Load test: constant arrival rate BELOW the measured max-limit, sustained 5 min,
- * against the public Oracle VM (1 OCPU) over the internet.
+ * Load test: trapezoid profile — ramp-up → steady state → ramp-down.
+ * Shape matches the lecture's load test diagram (Moshe Mamia, Lecture 9).
  *
- * 50 new VUs/sec × 40 keep-alive requests ≈ ~2,000-2,500 RPS sustained —
- * roughly 50% of the measured cliff (~4,000-5,000 RPS), i.e. the production
- * "normal traffic" envelope. Connections capped low so the load generator
- * never becomes the bottleneck.
+ * Sustainable max N = ~70 u/s (constant-rate calibration). Load runs at 90%
+ * of that = 63 u/s. Each VU does 40 keep-alive requests.
  *
- * Expectation: 0 errors, p99 well under 1s. If assertions fail, the
- * app has regressed under expected load.
+ * Profile (5 min total):
+ *   1 min ramp-up  0 -> 63 u/s
+ *   3 min steady       63 u/s
+ *   1 min ramp-down 63 -> 0 u/s
+ *
+ * Expectation: < 1% errors and low, stable latency throughout.
  */
 public class LoadSimulation extends Simulation {
 
@@ -34,7 +36,9 @@ public class LoadSimulation extends Simulation {
     {
         setUp(
             scn.injectOpen(
-                constantUsersPerSec(50).during(Duration.ofMinutes(5))
+                rampUsersPerSec(0).to(63).during(Duration.ofMinutes(1)),    // ramp-up
+                constantUsersPerSec(63).during(Duration.ofMinutes(3)),       // steady state (90% of max)
+                rampUsersPerSec(63).to(0).during(Duration.ofMinutes(1))     // ramp-down
             )
         )
         .protocols(httpProtocol)

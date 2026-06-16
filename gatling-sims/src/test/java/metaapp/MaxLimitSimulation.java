@@ -12,9 +12,10 @@ import java.time.Duration;
  * cliff of the public Oracle VM (1 OCPU) measured over the internet.
  *
  * Tuned for a remote target: a gentle ramp keeps the *client* from ever
- * becoming the bottleneck (the earlier 200 VUs/sec profile exhausted the
- * Mac's per-process file-descriptor cap before the server cliffed). Each VU
- * does 50 requests on one TCP connection; ramp 2 -> 80 new VUs/sec over 2 min.
+ * becoming the bottleneck. Each VU does 50 requests on one TCP connection;
+ * ramp 5 -> 120 new VUs/sec over 2 min. The knee (rising latency + first
+ * connection timeouts) appears around ~70 u/s, which is the sustainable max
+ * confirmed by the constant-rate Load/Stress tests.
  */
 public class MaxLimitSimulation extends Simulation {
 
@@ -33,7 +34,7 @@ public class MaxLimitSimulation extends Simulation {
     {
         setUp(
             scn.injectOpen(
-                rampUsersPerSec(10).to(160).during(Duration.ofMinutes(2))
+                rampUsersPerSec(5).to(120).during(Duration.ofMinutes(2))
             )
         )
         .protocols(httpProtocol)
