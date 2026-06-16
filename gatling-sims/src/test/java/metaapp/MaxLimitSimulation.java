@@ -1,46 +1,45 @@
-package metaapp;
+
+import java.time.Duration;
+import java.util.*;
 
 import io.gatling.javaapi.core.*;
 import io.gatling.javaapi.http.*;
+import io.gatling.javaapi.jdbc.*;
+
 import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.*;
-import java.time.Duration;
+import static io.gatling.javaapi.jdbc.JdbcDsl.*;
 
-/**
- * Max-limit: ramp arrival rate of new "sessions" while each session does a
- * short burst of requests on a single keep-alive connection, to find the
- * cliff of the public Oracle VM (1 OCPU) measured over the internet.
- *
- * Tuned for a remote target: a gentle ramp keeps the *client* from ever
- * becoming the bottleneck. Each VU does 50 requests on one TCP connection;
- * ramp 5 -> 120 new VUs/sec over 2 min. The knee (rising latency + first
- * connection timeouts) appears around ~70 u/s, which is the sustainable max
- * confirmed by the constant-rate Load/Stress tests.
- */
 public class MaxLimitSimulation extends Simulation {
 
-    HttpProtocolBuilder httpProtocol = http
-        .baseUrl(System.getProperty("baseUrl", "http://localhost:8080"))
-        .acceptHeader("text/html,application/xhtml+xml")
-        .userAgentHeader("Gatling-MaxLimit/1.0")
-        .maxConnectionsPerHost(400);
+  private HttpProtocolBuilder httpProtocol = http
+    .baseUrl("http://151.145.91.183:8080")
+    .inferHtmlResources()
+    .acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+    .acceptEncodingHeader("gzip, deflate")
+    .acceptLanguageHeader("en-HK,en;q=0.9,he-IL;q=0.8,he;q=0.7,en-GB;q=0.6,en-US;q=0.5")
+    .contentTypeHeader("application/x-www-form-urlencoded")
+    .originHeader("http://151.145.91.183:8080")
+    .upgradeInsecureRequestsHeader("1")
+    .userAgentHeader("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36");
+  
+  private Map<CharSequence, String> headers_0 = Map.of("Cache-Control", "max-age=0");
 
-    ScenarioBuilder scn = scenario("Ramp arrival rate to find the cliff")
-        // Each VU does 50 requests back-to-back on its keep-alive connection
-        .repeat(50).on(
-            exec(http("GET /roi-shiraz-omri-noa-arbel-app/").get("/roi-shiraz-omri-noa-arbel-app/").check(status().is(200)))
-        );
 
-    {
-        setUp(
-            scn.injectOpen(
-                rampUsersPerSec(5).to(120).during(Duration.ofMinutes(2))
-            )
-        )
-        .protocols(httpProtocol)
-        .assertions(
-            global().failedRequests().percent().lt(1.0),
-            global().responseTime().percentile3().lt(1000)
-        );
-    }
+  private ScenarioBuilder scn = scenario("MaxLimitSimulation")
+    .exec(
+      http("request_0")
+        .post("/roi-shiraz-omri-noa-arbel-app/index.jsp")
+        .headers(headers_0)
+        .formParam("name", "roi")
+    );
+
+  {
+	  setUp(
+      scn.injectOpen(
+        rampUsersPerSec(1).to(300).during(Duration.ofMinutes(4))
+      )
+    ).protocols(httpProtocol);
+    
+  }
 }
