@@ -1,19 +1,18 @@
+package metaapp;
 
 import java.time.Duration;
 import java.util.*;
 
 import io.gatling.javaapi.core.*;
 import io.gatling.javaapi.http.*;
-import io.gatling.javaapi.jdbc.*;
 
 import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.*;
-import static io.gatling.javaapi.jdbc.JdbcDsl.*;
 
 public class MaxLimitSimulation extends Simulation {
 
   private HttpProtocolBuilder httpProtocol = http
-    .baseUrl("http://151.145.91.183:8080")
+    .baseUrl(System.getProperty("baseUrl", "http://151.145.91.183:8080"))
     .inferHtmlResources()
     .acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
     .acceptEncodingHeader("gzip, deflate")
@@ -22,9 +21,8 @@ public class MaxLimitSimulation extends Simulation {
     .originHeader("http://151.145.91.183:8080")
     .upgradeInsecureRequestsHeader("1")
     .userAgentHeader("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36");
-  
-  private Map<CharSequence, String> headers_0 = Map.of("Cache-Control", "max-age=0");
 
+  private Map<CharSequence, String> headers_0 = Map.of("Cache-Control", "max-age=0");
 
   private ScenarioBuilder scn = scenario("MaxLimitSimulation")
     .exec(
@@ -35,11 +33,10 @@ public class MaxLimitSimulation extends Simulation {
     );
 
   {
-	  setUp(
+    setUp(
       scn.injectOpen(
         rampUsersPerSec(1).to(300).during(Duration.ofMinutes(4))
       )
     ).protocols(httpProtocol);
-    
   }
 }
