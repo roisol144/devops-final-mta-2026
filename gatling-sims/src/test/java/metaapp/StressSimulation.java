@@ -1,55 +1,50 @@
 package metaapp;
 
+import java.time.Duration;
+import java.util.*;
+
 import io.gatling.javaapi.core.*;
 import io.gatling.javaapi.http.*;
+
 import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.*;
-import java.time.Duration;
 
-/**
- * Stress test: triangular spike pattern — two cycles of ramp-up-to-peak /
- * ramp-down-to-baseline, matching the spike-test diagram (Lecture 9, p.5).
- *
- * Sustainable max N = ~70 u/s. Baseline = 35 u/s (50% of N, healthy).
- * Spike peak = 140 u/s (200% of N, intentional overload).
- *
- * Profile (5 min total):
- *   1 min  baseline      35 u/s
- *   1 min  ramp 35→140   spike 1 rising
- *   1 min  ramp 140→35   spike 1 falling / recovery
- *   1 min  ramp 35→140   spike 2 rising
- *   1 min  ramp 140→35   spike 2 falling / recovery
- *
- * Goal: show failure at the peaks and automatic recovery as load returns
- * to baseline — two full cycles to prove it is not a one-off.
- */
 public class StressSimulation extends Simulation {
 
-    HttpProtocolBuilder httpProtocol = http
-        .baseUrl(System.getProperty("baseUrl", "http://localhost:8080"))
-        .acceptHeader("text/html,application/xhtml+xml")
-        .userAgentHeader("Gatling-Stress/1.0")
-        .maxConnectionsPerHost(300);
+  private HttpProtocolBuilder httpProtocol = http
+    .baseUrl(System.getProperty("baseUrl", "http://151.145.91.183:8080"))
+    .inferHtmlResources()
+    .acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+    .acceptEncodingHeader("gzip, deflate")
+    .acceptLanguageHeader("en-HK,en;q=0.9,he-IL;q=0.8,he;q=0.7,en-GB;q=0.6,en-US;q=0.5")
+    .contentTypeHeader("application/x-www-form-urlencoded")
+    .originHeader("http://151.145.91.183:8080")
+    .upgradeInsecureRequestsHeader("1")
+    .userAgentHeader("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36");
 
-    ScenarioBuilder scn = scenario("Spike/recovery cycles around max limit")
-        .repeat(50).on(
-            exec(http("GET /roi-shiraz-omri-noa-arbel-app/").get("/roi-shiraz-omri-noa-arbel-app/").check(status().is(200)))
-        );
+  private Map<CharSequence, String> headers_0 = Map.of("Cache-Control", "max-age=0");
 
-    {
-        setUp(
-            scn.injectOpen(
-                constantUsersPerSec(35).during(Duration.ofMinutes(1)),          // baseline: 50% of max -> healthy
-                rampUsersPerSec(35).to(140).during(Duration.ofMinutes(1)),      // spike 1: rising to 2x max
-                rampUsersPerSec(140).to(35).during(Duration.ofMinutes(1)),      // spike 1: falling + recovery
-                rampUsersPerSec(35).to(140).during(Duration.ofMinutes(1)),      // spike 2: rising to 2x max
-                rampUsersPerSec(140).to(35).during(Duration.ofMinutes(1))       // spike 2: falling + recovery
-            )
-        )
-        .protocols(httpProtocol)
-        .assertions(
-            global().failedRequests().percent().lt(1.0),
-            global().responseTime().percentile3().lt(1000)
-        );
-    }
+  private ScenarioBuilder scn = scenario("StressSimulation")
+    .exec(
+      http("request_0")
+        .post("/roi-shiraz-omri-noa-arbel-app/index.jsp")
+        .headers(headers_0)
+        .formParam("name", "roi")
+    );
+
+  {
+    setUp(
+      scn.injectOpen(
+            rampUsersPerSec(1).to(50).during(Duration.ofSeconds(30)),
+            constantUsersPerSec(50).during(Duration.ofMinutes(1)),
+            rampUsersPerSec(50).to(100).during(Duration.ofSeconds(30)),
+            constantUsersPerSec(100).during(Duration.ofMinutes(1)),
+            rampUsersPerSec(100).to(150).during(Duration.ofSeconds(30)),
+            constantUsersPerSec(150).during(Duration.ofMinutes(1)),
+            rampUsersPerSec(150).to(200).during(Duration.ofSeconds(30)),
+            constantUsersPerSec(200).during(Duration.ofMinutes(1)),
+            rampUsersPerSec(200).to(0).during(Duration.ofSeconds(30))
+      )
+    ).protocols(httpProtocol);
+  }
 }

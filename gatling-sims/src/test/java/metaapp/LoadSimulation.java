@@ -1,50 +1,44 @@
 package metaapp;
 
+import java.time.Duration;
+import java.util.*;
+
 import io.gatling.javaapi.core.*;
 import io.gatling.javaapi.http.*;
+
 import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.*;
-import java.time.Duration;
 
-/**
- * Load test: trapezoid profile — ramp-up → steady state → ramp-down.
- * Shape matches the lecture's load test diagram (Moshe Mamia, Lecture 9).
- *
- * Sustainable max N = ~70 u/s (constant-rate calibration). Load runs at 90%
- * of that = 63 u/s. Each VU does 40 keep-alive requests.
- *
- * Profile (5 min total):
- *   1 min ramp-up  0 -> 63 u/s
- *   3 min steady       63 u/s
- *   1 min ramp-down 63 -> 0 u/s
- *
- * Expectation: < 1% errors and low, stable latency throughout.
- */
 public class LoadSimulation extends Simulation {
 
-    HttpProtocolBuilder httpProtocol = http
-        .baseUrl(System.getProperty("baseUrl", "http://localhost:8080"))
-        .acceptHeader("text/html,application/xhtml+xml")
-        .userAgentHeader("Gatling-Load/1.0")
-        .maxConnectionsPerHost(300);
+  private HttpProtocolBuilder httpProtocol = http
+    .baseUrl(System.getProperty("baseUrl", "http://151.145.91.183:8080"))
+    .inferHtmlResources()
+    .acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+    .acceptEncodingHeader("gzip, deflate")
+    .acceptLanguageHeader("en-HK,en;q=0.9,he-IL;q=0.8,he;q=0.7,en-GB;q=0.6,en-US;q=0.5")
+    .contentTypeHeader("application/x-www-form-urlencoded")
+    .originHeader("http://151.145.91.183:8080")
+    .upgradeInsecureRequestsHeader("1")
+    .userAgentHeader("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36");
 
-    ScenarioBuilder scn = scenario("Steady load below max limit")
-        .repeat(40).on(
-            exec(http("GET /roi-shiraz-omri-noa-arbel-app/").get("/roi-shiraz-omri-noa-arbel-app/").check(status().is(200)))
-        );
+  private Map<CharSequence, String> headers_0 = Map.of("Cache-Control", "max-age=0");
 
-    {
-        setUp(
-            scn.injectOpen(
-                rampUsersPerSec(0).to(63).during(Duration.ofMinutes(1)),    // ramp-up
-                constantUsersPerSec(63).during(Duration.ofMinutes(3)),       // steady state (90% of max)
-                rampUsersPerSec(63).to(0).during(Duration.ofMinutes(1))     // ramp-down
-            )
-        )
-        .protocols(httpProtocol)
-        .assertions(
-            global().failedRequests().percent().lt(1.0),
-            global().responseTime().percentile3().lt(1000)
-        );
-    }
+  private ScenarioBuilder scn = scenario("LoadSimulation")
+    .exec(
+      http("request_0")
+        .post("/roi-shiraz-omri-noa-arbel-app/index.jsp")
+        .headers(headers_0)
+        .formParam("name", "roi")
+    );
+
+  {
+    setUp(
+      scn.injectOpen(
+        rampUsersPerSec(0).to(80).during(Duration.ofMinutes(1)),
+        constantUsersPerSec(80).during(Duration.ofMinutes(3)),
+        rampUsersPerSec(80).to(0).during(Duration.ofMinutes(1))
+      )
+    ).protocols(httpProtocol);
+  }
 }
